@@ -1,59 +1,59 @@
 # AI ESP LIGHT CONTROL · Firmware
 
-AI ESP LIGHT CONTROL 的 ESP32-C3 BLE 灯光固件。它可以同时控制 WS2812B RGB 灯板和独立红黄绿交通灯，并与配套的 [Desktop 桌面端](https://github.com/easyreactuse/ble-light-desktop) 联动，将 Codex 任务状态转换为实体灯光提示。
+The ESP32-C3 BLE firmware for AI ESP LIGHT CONTROL. It controls a WS2812B RGB board and independent red, yellow, and green traffic lights, and works with the companion [Desktop app](https://github.com/easyreactuse/ble-light-desktop) to turn Codex task status into physical light signals.
 
-> [Desktop 桌面端](https://github.com/easyreactuse/ble-light-desktop) · [完整 BLE JSON 协议](BLE_COMMANDS.md)
+> [Desktop app](https://github.com/easyreactuse/ble-light-desktop) · [Complete BLE JSON protocol](BLE_COMMANDS.md)
 
-## 功能
+## Features
 
-- HW-160B（8 颗 WS2812B）：纯色、闪烁、彩虹跑马灯、同色渐变流光
-- 红黄绿交通灯：任意组合常亮、同步闪烁、PWM 呼吸
-- RGB 灯板与交通灯独立控制，也可通过一个 JSON 数组同时更新
-- BLE Write、Write Without Response、Read 和 Notify
-- 可选电池电压监测，低电量时使用板载 RGB 红灯报警
-- GPIO、BLE 设备名和电量阈值可通过 `menuconfig` 调整
+- HW-160B with eight WS2812B LEDs: solid color, blink, rainbow chase, and synchronized color flow
+- Red, yellow, and green traffic lights: any combination of steady, synchronized blinking, and PWM breathing
+- Independent RGB and traffic-light outputs, with optional atomic updates through a JSON array
+- BLE Write, Write Without Response, Read, and Notify
+- Optional battery-voltage monitoring with a low-battery warning on the onboard RGB LED
+- Configurable GPIO pins, BLE device name, and battery thresholds through `menuconfig`
 
-## 硬件与默认引脚
+## Hardware and default pins
 
-当前目标芯片为 **ESP32-C3**，使用 NimBLE，不使用经典蓝牙。
+The current target is **ESP32-C3**. The project uses NimBLE and does not use Classic Bluetooth.
 
-| 功能 | 默认 GPIO |
+| Function | Default GPIO |
 |---|---:|
 | HW-160B `DIN` | GPIO4 |
-| 交通灯红灯 | GPIO5 |
-| 交通灯黄灯 | GPIO6 |
-| 交通灯绿灯 | GPIO7 |
-| 板载 RGB | GPIO8 |
-| 可选电池 ADC | GPIO3 |
+| Red traffic light | GPIO5 |
+| Yellow traffic light | GPIO6 |
+| Green traffic light | GPIO7 |
+| Onboard RGB LED | GPIO8 |
+| Optional battery ADC | GPIO3 |
 
-GPIO8 是常见 ESP32-C3 DevKit 的板载 RGB 引脚。不同厂商开发板可能没有板载 RGB，或使用其他引脚，可在 `idf.py menuconfig` → **RGB light controller configuration** 中修改。
+GPIO8 is the onboard RGB pin on many ESP32-C3 DevKit boards. Some boards have no onboard RGB LED or use a different pin. Change it under `idf.py menuconfig` → **RGB light controller configuration**.
 
-### 红黄绿 LED 接线
+### Discrete traffic-light LEDs
 
-代码按高电平点亮设计，每颗 LED 都需要串联合适的限流电阻。
+The default circuit uses active-high outputs. Add a suitable current-limiting resistor in series with every LED.
 
 ```text
-GPIO5 ── 限流电阻 ── 红 LED 正极     红 LED 负极 ── GND
-GPIO6 ── 限流电阻 ── 黄 LED 正极     黄 LED 负极 ── GND
-GPIO7 ── 限流电阻 ── 绿 LED 正极     绿 LED 负极 ── GND
+GPIO5 ── resistor ── red LED anode       red LED cathode ── GND
+GPIO6 ── resistor ── yellow LED anode    yellow LED cathode ── GND
+GPIO7 ── resistor ── green LED anode     green LED cathode ── GND
 ```
 
-交通灯模块必须支持 3.3V 高电平控制。工作电流较大的灯需要使用三极管或 MOSFET 驱动，不能由 ESP32 GPIO 直接供电。
+A traffic-light module must accept 3.3 V logic. Use a transistor or MOSFET driver for loads that draw more current than an ESP32 GPIO can safely supply.
 
-### HW-160B 接线
+### HW-160B wiring
 
-| HW-160B | 连接位置 |
+| HW-160B | Connection |
 |---|---|
-| `DIN` | ESP32 GPIO4，建议串联 220～470Ω 电阻 |
-| `4-7VDC` | 稳定的 5V 电源正极 |
-| 任一 `GND` | 5V 电源负极，并与 ESP32 `GND` 共地 |
-| `DOUT` | 不接；仅在串接下一块灯板时使用 |
+| `DIN` | ESP32 GPIO4, preferably through a 220–470 Ω series resistor |
+| `4-7VDC` | Stable 5 V supply |
+| Either `GND` | Supply ground, shared with ESP32 `GND` |
+| `DOUT` | Leave open unless another board is chained |
 
-建议使用 5V/1A 电源，并在灯板电源入口并联 470～1000µF 电解电容。线路较长或灯光异常时，可在 GPIO4 与 `DIN` 之间加入 `74AHCT125` 等 3.3V→5V 电平转换器。不要把 ESP32 GPIO 直接连接 5V。
+Use a 5 V/1 A supply and place a 470–1000 µF electrolytic capacitor across the board's power input. If the data wire is long or the LEDs behave erratically, add a `74AHCT125` or similar 3.3 V-to-5 V level shifter between GPIO4 and `DIN`. Never connect an ESP32 GPIO directly to 5 V.
 
-## 快速开始
+## Quick start
 
-需要已安装并激活 ESP-IDF 环境。
+Install and activate an ESP-IDF environment first.
 
 ```bash
 git clone https://github.com/easyreactuse/esp32s3_rgb_flow.git
@@ -63,42 +63,42 @@ idf.py build
 idf.py -p /dev/cu.usbmodem1101 flash monitor
 ```
 
-请把串口设备名替换为本机实际端口。若串口仍报告芯片参数错误，执行 `idf.py fullclean`，然后再次设置目标芯片。退出监视器使用 `Ctrl+]`。
+Replace the serial device with the correct port on your computer. If the tool still reports a chip-target mismatch, run `idf.py fullclean`, set the ESP32-C3 target again, and rebuild. Press `Ctrl+]` to leave the monitor.
 
-## BLE 控制
+## BLE control
 
-| 项目 | 值 |
+| Item | Value |
 |---|---|
-| 广播名称 | `ESP-TRAFFIC-LIGHT` |
+| Advertised name | `ESP-TRAFFIC-LIGHT` |
 | Service UUID | `7b9a0001-6d4f-4f4b-9f2a-1c5e7a3d1000` |
 | Characteristic UUID | `7b9a0002-6d4f-4f4b-9f2a-1c5e7a3d1000` |
-| 数据格式 | UTF-8 JSON，最大 255 字节 |
+| Payload | UTF-8 JSON, up to 255 bytes |
 
-示例：RGB 流光与黄色交通灯闪烁同时运行。
+This example starts RGB color flow and blinks the yellow traffic light at the same time:
 
 ```json
 [{"output":"8_BIT_RGB","cmd":"flow","brightness":25,"speed":25},{"output":"TRAFFIC_LIGHT","light":["YELLOW"],"blink_ms":500}]
 ```
 
-命令字段、取值范围、返回结果和更多示例见 [BLE_COMMANDS.md](BLE_COMMANDS.md)。手机临时测试可使用 nRF Connect 或 LightBlue；日常控制及 Codex 状态联动推荐使用 [AI ESP LIGHT CONTROL Desktop](https://github.com/easyreactuse/ble-light-desktop)。
+See [BLE_COMMANDS.md](BLE_COMMANDS.md) for every command, parameter range, response, and example. nRF Connect or LightBlue is useful for temporary testing. For everyday control and Codex status automation, use [AI ESP LIGHT CONTROL Desktop](https://github.com/easyreactuse/ble-light-desktop).
 
-## 可选低电量检测
+## Optional low-battery monitoring
 
-软件无法仅凭供电引脚可靠判断电池电压，需要额外的电阻分压采样。单节锂电池可按以下方式连接：
+The ESP32 cannot infer battery voltage from its supply pin alone. A separate resistor divider is required. For a single-cell lithium battery, one possible circuit is:
 
 ```text
-电池正极 ── 100kΩ ──┬── GPIO3
-                    └── 100kΩ ── GND
-电池负极 ───────────────── GND
+Battery + ── 100 kΩ ──┬── GPIO3
+                      └── 100 kΩ ── GND
+Battery - ─────────────────── GND
 ```
 
-接线确认后，在 `idf.py menuconfig` 中启用 **Enable battery voltage monitoring**。默认低电量阈值为 3300mV，连续 3 次低于阈值后板载 RGB 以 20% 亮度红色闪烁；恢复到 3450mV 后关闭。
+After verifying the circuit, enable **Enable battery voltage monitoring** in `idf.py menuconfig`. The default low threshold is 3300 mV. After three consecutive low readings, the onboard RGB LED blinks red at 20% brightness. The warning clears when the reading recovers to 3450 mV.
 
-使用其他电池、电源模块或不同分压电阻时，必须先确认最高电压不会让 GPIO 超压，并相应修改分压比例与阈值。
+These defaults assume a single-cell lithium battery. With another battery, power module, or divider ratio, verify that the highest possible voltage cannot overdrive the GPIO and adjust the divider and thresholds accordingly.
 
-## 项目关系
+## Project relationship
 
-| 项目 | 用途 |
+| Project | Purpose |
 |---|---|
-| **AI ESP LIGHT CONTROL · Firmware**（本仓库） | ESP32-C3 固件，驱动灯光并实现 BLE JSON 协议 |
-| [**AI ESP LIGHT CONTROL · Desktop**](https://github.com/easyreactuse/ble-light-desktop) | BLE 设备管理、手动控制和 Codex Hooks 联动 |
+| **AI ESP LIGHT CONTROL · Firmware** (this repository) | ESP32-C3 firmware that drives the lights and implements the BLE JSON protocol |
+| [**AI ESP LIGHT CONTROL · Desktop**](https://github.com/easyreactuse/ble-light-desktop) | BLE device management, manual controls, and Codex Hooks automation |

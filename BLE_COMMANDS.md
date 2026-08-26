@@ -1,137 +1,137 @@
-# BLE 灯条控制协议
+# BLE Light Control Protocol
 
-ESP32 使用 BLE（低功耗蓝牙），ESP32-S3 和 ESP32-C3 均可使用。默认不要求配对，附近设备都能控制，适合当前本地测试；若用于公开环境，后续应增加绑定或应用层鉴权。
+The firmware uses Bluetooth Low Energy and is compatible with ESP32-C3 and ESP32-S3. Pairing is not required by default, so any nearby device can control the lights. This is convenient for local testing; add bonding or application-level authentication before deploying in a public environment.
 
-## 连接参数
+## Connection parameters
 
-| 项目 | 值 |
+| Item | Value |
 |---|---|
-| 广播名称 | `ESP-TRAFFIC-LIGHT` |
+| Advertised name | `ESP-TRAFFIC-LIGHT` |
 | Service UUID | `7b9a0001-6d4f-4f4b-9f2a-1c5e7a3d1000` |
 | Characteristic UUID | `7b9a0002-6d4f-4f4b-9f2a-1c5e7a3d1000` |
-| Characteristic 权限 | Read、Write、Write Without Response、Notify |
-| 数据格式 | UTF-8 JSON，不含结尾换行或 `\0` |
-| 单条命令最大长度 | 255 字节 |
+| Characteristic operations | Read, Write, Write Without Response, Notify |
+| Payload format | UTF-8 JSON without a trailing newline or `\0` |
+| Maximum command size | 255 bytes |
 
-手机可使用 nRF Connect 或 LightBlue 测试。连接设备后找到上述 Characteristic，用 UTF-8/Text 方式写入命令。建议订阅 Notify；每次写入后也可 Read 获取最后一次响应。
+For manual testing, connect with nRF Connect or LightBlue, locate the characteristic, and write commands as UTF-8 text. Subscribe to Notify for immediate responses. You can also Read the characteristic after each write to retrieve the most recent response.
 
-## 命令
+## Commands
 
-`output` 为可选输出类型。省略时默认为 `8_BIT_RGB`，因此原有命令无需修改。
-显式使用 RGB 灯板时也可以传入 `"output":"8_BIT_RGB"`。
+The `output` field selects an output type. When omitted, it defaults to `8_BIT_RGB`, so earlier RGB commands remain compatible. RGB commands may also specify `"output":"8_BIT_RGB"` explicitly.
 
-### 同时执行多个输出
+### Updating multiple outputs atomically
 
-顶层可以传入非空 JSON 数组。数组中的命令会先全部校验，再在同一时刻生效；任何一条无效时整组都不会执行。
+The top-level payload may be a non-empty JSON array. Every command is validated before any output changes, and all valid commands take effect together. If one item is invalid, none of them run.
 
-例如，让 8 位 RGB 灯板运行流光，同时让交通灯黄灯闪烁：
+This example starts RGB color flow and blinks the yellow traffic light:
 
 ```json
 [{"output":"8_BIT_RGB","cmd":"flow","brightness":25,"speed":25},{"output":"TRAFFIC_LIGHT","light":["YELLOW"],"blink_ms":500}]
 ```
 
-- 一个数组可以同时控制 `8_BIT_RGB` 和 `TRAFFIC_LIGHT`，两套输出互不清除。
-- 同一输出在数组中出现多次时，以最后一条为准。
-- 两类输出始终互不干扰；发送单个对象时，只更新对象指定的输出，另一类输出保持原状态。
-- RGB 使用 `{"cmd":"off"}` 独立关闭；交通灯使用 `{"output":"TRAFFIC_LIGHT","light":[]}` 独立关闭。
-- 顶层数组与单对象共用 255 字节长度限制。
+- `8_BIT_RGB` and `TRAFFIC_LIGHT` are independent and can run simultaneously.
+- If the same output appears more than once in an array, the last command for that output wins.
+- A single-object command changes only its selected output; the other output keeps its current state.
+- Use `{"cmd":"off"}` to turn off RGB independently.
+- Use `{"output":"TRAFFIC_LIGHT","light":[]}` to turn off the traffic lights independently.
+- Arrays and single objects share the same 255-byte payload limit.
 
-### 全部灯设置为相同颜色
+### Solid color
 
 ```json
 {"cmd":"solid","r":255,"g":80,"b":0,"brightness":25,"blink_ms":0}
 ```
 
-- `r`、`g`、`b`：必填，范围 0～255。
-- `brightness`：必填，范围 0～100，表示百分比。
-- `blink_ms`：可选，默认 0。0 表示常亮；大于 0 时表示亮、灭各持续多少毫秒。例如 500 表示亮 500 ms、灭 500 ms。
+- `r`, `g`, `b`: required integers from 0 to 255.
+- `brightness`: required integer from 0 to 100, expressed as a percentage.
+- `blink_ms`: optional, default `0`. Zero means steady. A positive value is the duration of both the on and off phase. For example, `500` means 500 ms on and 500 ms off.
 
-### 彩虹跑马灯
+### Rainbow chase
 
 ```json
 {"cmd":"chase","brightness":25,"step_ms":150}
 ```
 
-- `brightness`：可选，范围 0～100，默认 25。
-- `step_ms`：可选，范围 20～5000，表示移动一步的时间，默认 150 ms。
-- 8 颗灯保持不同彩虹颜色，并依次移动。
+- `brightness`: optional integer from 0 to 100; default `25`.
+- `step_ms`: optional integer from 20 to 5000; default `150`. It controls how long each movement step lasts.
+- The eight LEDs keep different rainbow colors and shift one position per step.
 
-### 流光
+### Synchronized color flow
 
 ```json
 {"cmd":"flow","brightness":25,"speed":25}
 ```
 
-- `brightness`：可选，范围 0～100，默认 25。
-- `speed`：可选，范围 1～100，默认 25；数值越大，渐变越快。
-- 所有灯珠始终保持相同颜色，并同步、平滑地遍历全部色相，避免不同颜色投射到同一位置后混合成白色。
+- `brightness`: optional integer from 0 to 100; default `25`.
+- `speed`: optional integer from 1 to 100; default `25`. Higher values transition faster.
+- All LEDs always show the same color and move smoothly through the hue spectrum together, avoiding the white light that can result from mixing different projected colors.
 
-### 关闭外接灯条
+### Turn off the RGB board
 
 ```json
 {"cmd":"off"}
 ```
 
-该命令只关闭外接 HW-160B，不影响低电量报警逻辑。
+This turns off only the external HW-160B. It does not change the low-battery warning logic.
 
-### 红黄绿交通灯
+### Red, yellow, and green traffic lights
 
 ```json
 {"output":"TRAFFIC_LIGHT","light":["RED","GREEN"],"blink_ms":500}
 ```
 
-- `output`：必须为 `TRAFFIC_LIGHT`。
-- `light`：必填数组，可包含 `RED`、`YELLOW`、`GREEN`。可以同时选择多个；空数组 `[]` 表示全部关闭。
-- `blink_ms`：可选，默认 0。0 表示常亮；大于 0 时，数组内的灯同步亮、灭，各持续指定的毫秒数。
-- `effect`：可选，可设为 `steady`、`blink` 或 `breathe`。省略时保持兼容：`blink_ms > 0` 为闪烁，否则为常亮。
-- `period_ms`：呼吸效果的完整渐亮、渐暗周期，范围 400～20000 ms，默认 1800 ms。
-- 三个交通灯采用高电平点亮：选中的灯对应 GPIO 输出约 3.3V，未选中的灯输出低电平。
-- 交通灯与 GPIO4 上的 RGB 灯板状态相互独立，控制或关闭其中一类不会改变另一类。
+- `output`: required and must be `TRAFFIC_LIGHT`.
+- `light`: required array containing any combination of `RED`, `YELLOW`, and `GREEN`. Multiple lights may be selected. An empty array turns them all off.
+- `blink_ms`: optional, default `0`. Zero means steady. A positive value sets both the on and off duration in milliseconds.
+- `effect`: optional and may be `steady`, `blink`, or `breathe`. When omitted, backward-compatible behavior applies: `blink_ms > 0` selects blinking; otherwise the output is steady.
+- `period_ms`: complete fade-in/fade-out period for `breathe`, from 400 to 20000 ms; default `1800`.
+- The traffic-light GPIO outputs are active-high: selected lights receive approximately 3.3 V and unselected lights receive 0 V.
+- Traffic-light state is independent of the RGB board on GPIO4.
 
-绿灯以 1.8 秒周期呼吸：
+Green breathing with a 1.8-second period:
 
 ```json
 {"output":"TRAFFIC_LIGHT","light":["GREEN"],"effect":"breathe","period_ms":1800}
 ```
 
-`period_ms` 越小呼吸越快，越大越慢。呼吸效果由 ESP32 LEDC PWM 产生，GPIO 仍输出 0/3.3V 脉冲，不是模拟电压输出。
+A smaller `period_ms` breathes faster; a larger value breathes slower. The effect uses ESP32 LEDC PWM. The GPIO still produces 0/3.3 V pulses rather than an analog voltage.
 
-常亮黄灯：
+Steady yellow:
 
 ```json
 {"output":"TRAFFIC_LIGHT","light":["YELLOW"],"blink_ms":0}
 ```
 
-关闭三个交通灯：
+Turn off all traffic lights:
 
 ```json
 {"output":"TRAFFIC_LIGHT","light":[]}
 ```
 
-## 返回结果
+## Responses
 
-成功示例：
+Successful RGB command:
 
 ```json
 {"ok":true,"mode":"solid"}
 ```
 
-交通灯成功示例：
+Successful traffic-light command:
 
 ```json
 {"ok":true,"output":"TRAFFIC_LIGHT"}
 ```
 
-数组成功示例（`outputs` 为输出位掩码：RGB=1、交通灯=2）：
+Successful array command. `outputs` is a bit mask where RGB is `1` and traffic lights are `2`:
 
 ```json
 {"ok":true,"count":2,"outputs":3}
 ```
 
-失败示例：
+Error response:
 
 ```json
 {"ok":false,"error":"invalid solid parameter"}
 ```
 
-GATT 写操作本身成功只表示命令已送达；参数是否合法以 Notify 或随后 Read 得到的 JSON 为准。
+A successful GATT write only confirms that the command reached the characteristic. Use the Notify response or a subsequent Read to determine whether the firmware accepted and executed the parameters.
