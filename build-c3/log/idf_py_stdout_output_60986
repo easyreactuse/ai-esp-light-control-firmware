@@ -1,0 +1,9 @@
+Command: cmake -G Ninja -B /Users/roger/work/esp32/esp32s3_rgb_flow/build-c3 -DPYTHON_DEPS_CHECKED=1 -DPYTHON=/Users/roger/.espressif/tools/python/v6.0.2/venv/bin/python -DESP_PLATFORM=1 -DCCACHE_ENABLE=False /Users/roger/work/esp32/esp32s3_rgb_flow
+-- Component directory /Users/roger/.espressif/v6.0.2/esp-idf/components/mqtt does not contain a CMakeLists.txt file. No component will be added
+-- Minimal build - OFF
+-- git rev-parse returned 'git: error: couldn't create cache file '/var/folders/zz/zyxvpxvq6csfxvn_n00001yr0000gp/T/xcrun_db-PNWPoKV7' (errno=Operation not permitted)
+git: error: couldn't create cache file '/var/folders/zz/zyxvpxvq6csfxvn_n00001yr0000gp/T/xcrun_db-7xNosduz' (errno=Operation not permitted)
+fatal: not a git repository (or any of the parent directories): .git'
+-- Could not use 'git describe' to determine PROJECT_VER.
+-- Building ESP-IDF components for target esp32c3
+-- Configuring incomplete, errors occurred!

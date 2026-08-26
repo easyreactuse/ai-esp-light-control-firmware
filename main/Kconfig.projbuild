@@ -1,0 +1,113 @@
+menu "RGB light controller configuration"
+
+    config RGB_LED_GPIO
+        int "Onboard RGB LED GPIO"
+        range 0 48
+        default 8 if IDF_TARGET_ESP32C3
+        default 48 if IDF_TARGET_ESP32S3
+        default 48
+        help
+            Official ESP32-C3 DevKit boards use GPIO 8. ESP32-S3 board
+            revisions differ, so check the schematic if the LED does not work.
+
+    config EXTERNAL_LED_GPIO
+        int "HW-160B DIN GPIO"
+        range 0 48
+        default 4
+
+    config EXTERNAL_LED_COUNT
+        int "HW-160B LED count"
+        range 1 256
+        default 8
+
+    config TRAFFIC_RED_GPIO
+        int "Traffic light red LED GPIO"
+        range 0 48
+        default 5
+
+    config TRAFFIC_YELLOW_GPIO
+        int "Traffic light yellow LED GPIO"
+        range 0 48
+        default 6
+
+    config TRAFFIC_GREEN_GPIO
+        int "Traffic light green LED GPIO"
+        range 0 48
+        default 7
+
+    config DEFAULT_EXTERNAL_BRIGHTNESS
+        int "Default external strip brightness (%)"
+        range 0 100
+        default 25
+
+    config DEFAULT_CHASE_STEP_MS
+        int "Default rainbow chase step (ms)"
+        range 20 5000
+        default 150
+
+    config DEFAULT_FLOW_SPEED
+        int "Default synchronized color flow speed (%)"
+        range 1 100
+        default 25
+        help
+            Higher values produce a faster synchronized color transition.
+
+    config BLE_DEVICE_NAME
+        string "BLE device name"
+        default "ESP-TRAFFIC-LIGHT"
+
+    config LOW_BATTERY_LED_BRIGHTNESS
+        int "Low-battery red LED brightness (%)"
+        range 1 100
+        default 20
+
+    config LOW_BATTERY_BLINK_MS
+        int "Low-battery red LED blink interval (ms)"
+        range 100 5000
+        default 500
+
+    config BATTERY_MONITOR_ENABLE
+        bool "Enable battery voltage monitoring"
+        default n
+        help
+            Requires a voltage divider from battery positive to an ADC GPIO.
+            Keep disabled until the sampling circuit is connected.
+
+    if BATTERY_MONITOR_ENABLE
+
+        config BATTERY_ADC_GPIO
+            int "Battery voltage ADC GPIO"
+            range 0 10
+            default 3
+
+        config BATTERY_LOW_MV
+            int "Low-battery threshold (mV)"
+            range 1000 12000
+            default 3300
+
+        config BATTERY_HYSTERESIS_MV
+            int "Low-battery recovery hysteresis (mV)"
+            range 0 1000
+            default 150
+
+        config BATTERY_DIVIDER_NUMERATOR
+            int "Voltage-divider ratio numerator"
+            range 1 100
+            default 2
+            help
+                For equal 100k/100k resistors, battery voltage is twice the
+                ADC pin voltage, so use numerator=2 and denominator=1.
+
+        config BATTERY_DIVIDER_DENOMINATOR
+            int "Voltage-divider ratio denominator"
+            range 1 100
+            default 1
+
+        config BATTERY_SAMPLE_INTERVAL_MS
+            int "Battery sample interval (ms)"
+            range 200 60000
+            default 2000
+
+    endif
+
+endmenu

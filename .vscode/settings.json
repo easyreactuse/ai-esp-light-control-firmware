@@ -1,0 +1,17 @@
+{
+  "idf.currentSetup": "/Users/roger/.espressif/v6.0.2/esp-idf",
+  "idf.flashType": "UART",
+  "idf.openOcdConfigs": [
+    "board/esp32c3-builtin.cfg"
+  ],
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32c3"
+  },
+  "clangd.path": "/Users/roger/.espressif/tools/esp-clang/esp-20.1.1_20250829/esp-clang/bin/clangd",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=**",
+    "--compile-commands-dir=/Users/roger/work/esp32/esp32s3_rgb_flow/build"
+  ],
+  "idf.port": "/dev/cu.usbmodem1101"
+}

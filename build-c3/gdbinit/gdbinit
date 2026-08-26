@@ -1,0 +1,2 @@
+source /Users/roger/work/esp32/esp32s3_rgb_flow/build-c3/gdbinit/symbols
+source /Users/roger/work/esp32/esp32s3_rgb_flow/build-c3/gdbinit/connect

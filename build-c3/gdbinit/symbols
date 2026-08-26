@@ -1,0 +1,9 @@
+
+
+# Load bootloader symbols
+set confirm off
+    add-symbol-file /Users/roger/work/esp32/esp32s3_rgb_flow/build-c3/bootloader/bootloader.elf
+set confirm on
+
+# Load application symbols
+file /Users/roger/work/esp32/esp32s3_rgb_flow/build-c3/esp32c3_rgb_control.elf
