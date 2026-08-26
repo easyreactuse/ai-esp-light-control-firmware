@@ -1,8 +1,8 @@
 # AI ESP LIGHT CONTROL · Firmware
 
-The ESP32-C3 BLE firmware for AI ESP LIGHT CONTROL. It controls a WS2812B RGB board and independent red, yellow, and green traffic lights, and works with the companion [Desktop app](https://github.com/easyreactuse/ble-light-desktop) to turn Codex task status into physical light signals.
+The ESP32-C3 BLE firmware for AI ESP LIGHT CONTROL. It controls a WS2812B RGB board and independent red, yellow, and green traffic lights, and works with the companion [Desktop app](https://github.com/easyreactuse/ai-esp-light-control-desktop) to turn Codex task status into physical light signals.
 
-> [Desktop app](https://github.com/easyreactuse/ble-light-desktop) · [Complete BLE JSON protocol](BLE_COMMANDS.md)
+> [Desktop app](https://github.com/easyreactuse/ai-esp-light-control-desktop) · [Complete BLE JSON protocol](BLE_COMMANDS.md)
 
 ## Features
 
@@ -56,8 +56,8 @@ Use a 5 V/1 A supply and place a 470–1000 µF electrolytic capacitor across th
 Install and activate an ESP-IDF environment first.
 
 ```bash
-git clone https://github.com/easyreactuse/esp32s3_rgb_flow.git
-cd esp32s3_rgb_flow
+git clone https://github.com/easyreactuse/ai-esp-light-control-firmware.git
+cd ai-esp-light-control-firmware
 idf.py set-target esp32c3
 idf.py build
 idf.py -p /dev/cu.usbmodem1101 flash monitor
@@ -80,7 +80,7 @@ This example starts RGB color flow and blinks the yellow traffic light at the sa
 [{"output":"8_BIT_RGB","cmd":"flow","brightness":25,"speed":25},{"output":"TRAFFIC_LIGHT","light":["YELLOW"],"blink_ms":500}]
 ```
 
-See [BLE_COMMANDS.md](BLE_COMMANDS.md) for every command, parameter range, response, and example. nRF Connect or LightBlue is useful for temporary testing. For everyday control and Codex status automation, use [AI ESP LIGHT CONTROL Desktop](https://github.com/easyreactuse/ble-light-desktop).
+See [BLE_COMMANDS.md](BLE_COMMANDS.md) for every command, parameter range, response, and example. nRF Connect or LightBlue is useful for temporary testing. For everyday control and Codex status automation, use [AI ESP LIGHT CONTROL Desktop](https://github.com/easyreactuse/ai-esp-light-control-desktop).
 
 ## Optional low-battery monitoring
 
@@ -101,4 +101,4 @@ These defaults assume a single-cell lithium battery. With another battery, power
 | Project | Purpose |
 |---|---|
 | **AI ESP LIGHT CONTROL · Firmware** (this repository) | ESP32-C3 firmware that drives the lights and implements the BLE JSON protocol |
-| [**AI ESP LIGHT CONTROL · Desktop**](https://github.com/easyreactuse/ble-light-desktop) | BLE device management, manual controls, and Codex Hooks automation |
+| [**AI ESP LIGHT CONTROL · Desktop**](https://github.com/easyreactuse/ai-esp-light-control-desktop) | BLE device management, manual controls, and Codex Hooks automation |
