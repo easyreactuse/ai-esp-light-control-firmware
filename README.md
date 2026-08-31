@@ -26,16 +26,29 @@ The current target is **ESP32-C3**. The project uses NimBLE and does not use Cla
 | Onboard RGB LED | GPIO8 |
 | Optional battery ADC | GPIO3 |
 
+![ESP32-C3 wiring diagram](docs/wiring-diagram.svg)
+
 GPIO8 is the onboard RGB pin on many ESP32-C3 DevKit boards. Some boards have no onboard RGB LED or use a different pin. Change it under `idf.py menuconfig` → **RGB light controller configuration**.
+
+### Power
+
+Power the ESP32-C3 development board using **one** of these inputs:
+
+- Connect USB Type-C to the development board; its `5V`/`VBUS` pin then provides the USB 5 V rail to the HW-160B.
+- Connect a regulated external 5 V supply to the development board's `5V`/`VBUS` pin and `GND`.
+
+Do not connect USB Type-C and an external 5 V input at the same time unless the specific development board documents safe power-path isolation. Pin labels and USB power routing vary between boards, so verify the board schematic before using `5V`/`VBUS` as an input or output. The supply and USB cable must be able to handle the ESP32-C3 and LED current together.
+
+Use the `5V`/`VBUS` pin—not `3V3`—for the HW-160B `4-7VDC` input. The traffic-light LEDs are driven from 3.3 V GPIO through their individual current-limiting resistors. All grounds must be connected together.
 
 ### Discrete traffic-light LEDs
 
-The default circuit uses active-high outputs. Add a suitable current-limiting resistor in series with every LED.
+The default circuit uses active-high outputs. A selected GPIO outputs approximately 3.3 V. The documented build uses 100 Ω resistors for red and yellow, and 330 Ω for green.
 
 ```text
-GPIO5 ── resistor ── red LED anode       red LED cathode ── GND
-GPIO6 ── resistor ── yellow LED anode    yellow LED cathode ── GND
-GPIO7 ── resistor ── green LED anode     green LED cathode ── GND
+GPIO5 (3.3 V high) ── 100 Ω ── red LED anode       red LED cathode ── GND
+GPIO6 (3.3 V high) ── 100 Ω ── yellow LED anode    yellow LED cathode ── GND
+GPIO7 (3.3 V high) ── 330 Ω ── green LED anode     green LED cathode ── GND
 ```
 
 A traffic-light module must accept 3.3 V logic. Use a transistor or MOSFET driver for loads that draw more current than an ESP32 GPIO can safely supply.
@@ -45,11 +58,11 @@ A traffic-light module must accept 3.3 V logic. Use a transistor or MOSFET drive
 | HW-160B | Connection |
 |---|---|
 | `DIN` | ESP32 GPIO4, preferably through a 220–470 Ω series resistor |
-| `4-7VDC` | Stable 5 V supply |
-| Either `GND` | Supply ground, shared with ESP32 `GND` |
+| `4-7VDC` | ESP32 development board `5V`/`VBUS` pin |
+| Either `GND` | ESP32 development board `GND` |
 | `DOUT` | Leave open unless another board is chained |
 
-Use a 5 V/1 A supply and place a 470–1000 µF electrolytic capacitor across the board's power input. If the data wire is long or the LEDs behave erratically, add a `74AHCT125` or similar 3.3 V-to-5 V level shifter between GPIO4 and `DIN`. Never connect an ESP32 GPIO directly to 5 V.
+Place a 470–1000 µF electrolytic capacitor across the HW-160B power input. If the data wire is long or the LEDs behave erratically, add a `74AHCT125` or similar 3.3 V-to-5 V level shifter between GPIO4 and `DIN`. Never connect an ESP32 GPIO directly to 5 V.
 
 ## Quick start
 
@@ -77,7 +90,7 @@ Replace the serial device with the correct port on your computer. If the tool st
 This example starts RGB color flow and blinks the yellow traffic light at the same time:
 
 ```json
-[{"output":"8_BIT_RGB","cmd":"flow","brightness":25,"speed":25},{"output":"TRAFFIC_LIGHT","light":["YELLOW"],"blink_ms":500}]
+[{"output":"8_BIT_RGB","cmd":"flow","brightness":25,"speed":25},{"output":"TRAFFIC_LIGHT","light":["YELLOW"],"brightness":60,"blink_ms":500}]
 ```
 
 See [BLE_COMMANDS.md](BLE_COMMANDS.md) for every command, parameter range, response, and example. nRF Connect or LightBlue is useful for temporary testing. For everyday control and Codex status automation, use [AI ESP LIGHT CONTROL Desktop](https://github.com/easyreactuse/ai-esp-light-control-desktop).

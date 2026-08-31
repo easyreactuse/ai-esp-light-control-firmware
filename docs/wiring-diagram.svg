@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-labelledby="title desc">
+  <title id="title">AI ESP Light Control wiring diagram</title>
+  <desc id="desc">ESP32-C3 connected to an HW-160B WS2812B board, three traffic-light LEDs, a shared five volt supply, and an optional battery voltage divider.</desc>
+  <defs>
+    <style>
+      text { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #172033; }
+      .title { font-size: 32px; font-weight: 700; }
+      .subtitle { font-size: 17px; fill: #566176; }
+      .box-title { font-size: 21px; font-weight: 700; }
+      .label { font-size: 17px; font-weight: 600; }
+      .small { font-size: 15px; fill: #566176; }
+      .pin { font-size: 16px; font-weight: 700; }
+      .board { fill: #f7f9fc; stroke: #44516a; stroke-width: 2.5; }
+      .module { fill: #eef7f2; stroke: #367052; stroke-width: 2.5; }
+      .optional { fill: #fff9eb; stroke: #a06a00; stroke-width: 2.5; stroke-dasharray: 9 7; }
+      .wire { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .data { stroke: #2563eb; }
+      .power { stroke: #e53935; }
+      .ground { stroke: #2f3640; }
+      .red { stroke: #e53935; }
+      .yellow { stroke: #d89b00; }
+      .green { stroke: #159447; }
+      .sense { stroke: #8b5cf6; stroke-dasharray: 8 6; }
+      .node { stroke: #ffffff; stroke-width: 2; }
+    </style>
+    <marker id="arrow-blue" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="900" fill="#ffffff"/>
+  <text x="64" y="62" class="title">ESP32-C3 default wiring</text>
+  <text x="64" y="91" class="subtitle">AI ESP LIGHT CONTROL firmware · GPIO assignments match the project defaults</text>
+
+  <!-- ESP32-C3 -->
+  <rect x="70" y="150" width="330" height="500" rx="24" class="board"/>
+  <text x="235" y="195" text-anchor="middle" class="box-title">ESP32-C3 DevKit</text>
+  <rect x="153" y="218" width="164" height="92" rx="10" fill="#26364d"/>
+  <text x="235" y="255" text-anchor="middle" style="font-size:18px;font-weight:700;fill:#ffffff">ESP32-C3</text>
+  <text x="235" y="281" text-anchor="middle" style="font-size:14px;fill:#c9d5e8">3.3 V logic</text>
+
+  <rect x="64" y="248" width="42" height="54" rx="8" fill="#dce3ee" stroke="#44516a" stroke-width="2.5"/>
+  <rect x="43" y="261" width="32" height="28" rx="7" fill="#ffffff" stroke="#44516a" stroke-width="2.5"/>
+  <path d="M8 275 H43" class="wire power"/>
+
+  <text x="340" y="355" text-anchor="end" class="pin">GPIO4</text>
+  <circle cx="375" cy="350" r="7" fill="#2563eb" class="node"/>
+  <text x="340" y="405" text-anchor="end" class="pin">GPIO5</text>
+  <circle cx="375" cy="400" r="7" fill="#e53935" class="node"/>
+  <text x="340" y="455" text-anchor="end" class="pin">GPIO6</text>
+  <circle cx="375" cy="450" r="7" fill="#d89b00" class="node"/>
+  <text x="340" y="505" text-anchor="end" class="pin">GPIO7</text>
+  <circle cx="375" cy="500" r="7" fill="#159447" class="node"/>
+  <text x="340" y="555" text-anchor="end" class="pin">GPIO3</text>
+  <circle cx="375" cy="550" r="7" fill="#8b5cf6" class="node"/>
+  <text x="340" y="605" text-anchor="end" class="pin">GND</text>
+  <circle cx="375" cy="600" r="7" fill="#2f3640" class="node"/>
+  <text x="340" y="635" text-anchor="end" class="pin">5V / VBUS</text>
+  <circle cx="375" cy="630" r="7" fill="#e53935" class="node"/>
+  <text x="96" y="328" class="small">GPIO8: onboard RGB LED</text>
+  <text x="96" y="350" class="small">No external wire required</text>
+
+  <!-- HW-160B -->
+  <rect x="830" y="132" width="370" height="228" rx="22" class="module"/>
+  <text x="1015" y="173" text-anchor="middle" class="box-title">HW-160B · 8 × WS2812B</text>
+  <g>
+    <circle cx="883" cy="222" r="19" fill="#f45b69"/><circle cx="925" cy="222" r="19" fill="#ffb347"/>
+    <circle cx="967" cy="222" r="19" fill="#ffe66d"/><circle cx="1009" cy="222" r="19" fill="#59cd90"/>
+    <circle cx="1051" cy="222" r="19" fill="#4d96ff"/><circle cx="1093" cy="222" r="19" fill="#845ec2"/>
+    <circle cx="1135" cy="222" r="19" fill="#d65db1"/><circle cx="1177" cy="222" r="19" fill="#ff6f91"/>
+  </g>
+  <text x="860" y="298" class="pin">DIN</text>
+  <circle cx="850" cy="293" r="7" fill="#2563eb" class="node"/>
+  <text x="1090" y="334" class="pin">GND</text>
+  <circle cx="1075" cy="329" r="7" fill="#2f3640" class="node"/>
+  <text x="1190" y="334" text-anchor="end" class="pin">4–7VDC</text>
+  <circle cx="1190" cy="329" r="7" fill="#e53935" class="node"/>
+
+  <!-- Traffic LEDs -->
+  <rect x="830" y="390" width="370" height="270" rx="22" class="board"/>
+  <text x="1015" y="431" text-anchor="middle" class="box-title">Discrete traffic-light LEDs</text>
+  <text x="854" y="465" class="small">GPIO high ~ 3.3 V · one resistor per LED</text>
+
+  <path d="M850 500 H925" class="wire red"/>
+  <rect x="925" y="485" width="76" height="30" rx="6" fill="#fff" stroke="#e53935" stroke-width="2"/>
+  <text x="963" y="506" text-anchor="middle" class="small">100 Ω</text>
+  <path d="M1001 500 H1050" class="wire red"/>
+  <circle cx="1075" cy="500" r="20" fill="#e53935" stroke="#982226" stroke-width="2"/>
+  <text x="1110" y="506" class="label">RED</text>
+
+  <path d="M850 555 H925" class="wire yellow"/>
+  <rect x="925" y="540" width="76" height="30" rx="6" fill="#fff" stroke="#d89b00" stroke-width="2"/>
+  <text x="963" y="561" text-anchor="middle" class="small">100 Ω</text>
+  <path d="M1001 555 H1050" class="wire yellow"/>
+  <circle cx="1075" cy="555" r="20" fill="#ffc928" stroke="#b38200" stroke-width="2"/>
+  <text x="1110" y="561" class="label">YELLOW</text>
+
+  <path d="M850 610 H925" class="wire green"/>
+  <rect x="925" y="595" width="76" height="30" rx="6" fill="#fff" stroke="#159447" stroke-width="2"/>
+  <text x="963" y="616" text-anchor="middle" class="small">330 Ω</text>
+  <path d="M1001 610 H1050" class="wire green"/>
+  <circle cx="1075" cy="610" r="20" fill="#22b95d" stroke="#0d7134" stroke-width="2"/>
+  <text x="1110" y="616" class="label">GREEN</text>
+
+  <!-- Signal wires -->
+  <path d="M375 350 H520 V293 H850" class="wire data" marker-end="url(#arrow-blue)"/>
+  <rect x="605" y="276" width="98" height="34" rx="7" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+  <text x="654" y="299" text-anchor="middle" class="small">220–470 Ω</text>
+  <text x="535" y="280" class="small">WS2812 data</text>
+
+  <path d="M375 400 H760 V500 H850" class="wire red"/>
+  <path d="M375 450 H740 V555 H850" class="wire yellow"/>
+  <path d="M375 500 H720 V610 H850" class="wire green"/>
+
+  <!-- Ground bus -->
+  <path d="M375 600 H665 V700 H1160" class="wire ground"/>
+  <path d="M1075 329 H1160 V700" class="wire ground"/>
+  <path d="M1075 520 V680 H1160" class="wire ground"/>
+  <path d="M1075 575 V680" class="wire ground"/>
+  <path d="M1075 630 V680" class="wire ground"/>
+  <circle cx="1160" cy="700" r="7" fill="#2f3640"/>
+  <text x="1010" y="726" class="label">Common ground</text>
+
+  <!-- Board power rail and input choices -->
+  <path d="M375 630 H450 V675 H1230 V329 H1190" class="wire power"/>
+  <text x="770" y="694" class="small">5V/VBUS → HW-160B 4–7VDC</text>
+  <text x="770" y="716" class="small">470–1000 µF across power near HW-160B</text>
+
+  <rect x="490" y="742" width="690" height="106" rx="18" class="module"/>
+  <text x="835" y="778" text-anchor="middle" class="box-title">Power the development board — choose one input</text>
+  <text x="520" y="812" class="label">A</text>
+  <text x="548" y="812" class="small">USB Type-C → board Type-C port</text>
+  <text x="825" y="812" class="label">B</text>
+  <text x="853" y="812" class="small">Regulated +5 V → 5V/VBUS; supply GND → GND</text>
+  <text x="835" y="837" text-anchor="middle" class="small">Do not connect both unless your board documents safe power-path isolation.</text>
+
+  <!-- Optional battery monitor -->
+  <rect x="70" y="700" width="360" height="150" rx="18" class="optional"/>
+  <text x="250" y="736" text-anchor="middle" class="box-title">Optional battery monitor</text>
+  <text x="92" y="774" class="label">Battery +</text>
+  <path d="M175 769 H230" class="wire power"/>
+  <rect x="230" y="754" width="74" height="30" rx="6" fill="#fff" stroke="#a06a00" stroke-width="2"/>
+  <text x="267" y="775" text-anchor="middle" class="small">100 kΩ</text>
+  <circle cx="330" cy="769" r="6" fill="#8b5cf6"/>
+  <path d="M304 769 H330 V820" class="wire sense"/>
+  <rect x="293" y="805" width="74" height="30" rx="6" fill="#fff" stroke="#a06a00" stroke-width="2"/>
+  <text x="330" y="826" text-anchor="middle" class="small">100 kΩ</text>
+  <path d="M330 835 V845" class="wire ground"/>
+  <text x="92" y="820" class="small">Divider midpoint → GPIO3</text>
+  <text x="92" y="842" class="small">Battery − → common GND</text>
+
+  <text x="64" y="882" class="small">Use 5V/VBUS—not 3V3—for HW-160B. Never connect 5 V to a GPIO. Verify your board's 5V/VBUS routing.</text>
+</svg>

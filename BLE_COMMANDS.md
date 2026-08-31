@@ -77,11 +77,12 @@ This turns off only the external HW-160B. It does not change the low-battery war
 ### Red, yellow, and green traffic lights
 
 ```json
-{"output":"TRAFFIC_LIGHT","light":["RED","GREEN"],"blink_ms":500}
+{"output":"TRAFFIC_LIGHT","light":["RED","GREEN"],"brightness":60,"blink_ms":500}
 ```
 
 - `output`: required and must be `TRAFFIC_LIGHT`.
 - `light`: required array containing any combination of `RED`, `YELLOW`, and `GREEN`. Multiple lights may be selected. An empty array turns them all off.
+- `brightness`: optional integer from 0 to 100, expressed as a percentage; default `100`.
 - `blink_ms`: optional, default `0`. Zero means steady. A positive value sets both the on and off duration in milliseconds.
 - `effect`: optional and may be `steady`, `blink`, or `breathe`. When omitted, backward-compatible behavior applies: `blink_ms > 0` selects blinking; otherwise the output is steady.
 - `period_ms`: complete fade-in/fade-out period for `breathe`, from 400 to 20000 ms; default `1800`.
@@ -91,10 +92,10 @@ This turns off only the external HW-160B. It does not change the low-battery war
 Green breathing with a 1.8-second period:
 
 ```json
-{"output":"TRAFFIC_LIGHT","light":["GREEN"],"effect":"breathe","period_ms":1800}
+{"output":"TRAFFIC_LIGHT","light":["GREEN"],"brightness":60,"effect":"breathe","period_ms":1800}
 ```
 
-A smaller `period_ms` breathes faster; a larger value breathes slower. The effect uses ESP32 LEDC PWM. The GPIO still produces 0/3.3 V pulses rather than an analog voltage.
+A smaller `period_ms` breathes faster; a larger value breathes slower. `brightness` sets the peak duty cycle for every effect. The effect uses ESP32 LEDC PWM. The GPIO still produces 0/3.3 V pulses rather than an analog voltage.
 
 Steady yellow:
 

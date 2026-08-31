@@ -1,3 +1,0 @@
-"-specs=/Users/roger/work/esp32/esp32s3_rgb_flow/build-c3/bootloader/specs/picolibc.specs"
--march=rv32imc_zicsr_zifencei
--mtune=esp-base

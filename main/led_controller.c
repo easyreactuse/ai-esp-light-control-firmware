@@ -39,6 +39,7 @@ typedef struct {
     uint8_t brightness;
     uint32_t rgb_blink_ms;
     uint8_t traffic_lights;
+    uint8_t traffic_brightness;
     uint32_t traffic_blink_ms;
     traffic_effect_t traffic_effect;
     uint32_t traffic_period_ms;
@@ -176,16 +177,19 @@ static uint32_t traffic_breathe_duty(const light_state_t *state,
     const uint32_t smooth = (uint32_t)(((uint64_t)x * x *
                                         (3072U - 2U * x)) /
                                        (1024U * 1024U));
-    return (uint32_t)(((uint64_t)TRAFFIC_PWM_MAX_DUTY * smooth) / 1024U);
+    return (uint32_t)(((uint64_t)TRAFFIC_PWM_MAX_DUTY * smooth *
+                       state->traffic_brightness) / (1024U * 100U));
 }
 
 static void render_traffic_light(const light_state_t *state, int64_t timestamp_ms)
 {
-    uint32_t duty = TRAFFIC_PWM_MAX_DUTY;
+    const uint32_t max_duty = (uint32_t)(((uint64_t)TRAFFIC_PWM_MAX_DUTY *
+                                          state->traffic_brightness) / 100U);
+    uint32_t duty = max_duty;
     if (state->traffic_effect == TRAFFIC_EFFECT_BLINK) {
         const bool visible = ((timestamp_ms - state->traffic_changed_at_ms) /
                               state->traffic_blink_ms) % 2 == 0;
-        duty = visible ? TRAFFIC_PWM_MAX_DUTY : 0;
+        duty = visible ? max_duty : 0;
     } else if (state->traffic_effect == TRAFFIC_EFFECT_BREATHE) {
         duty = traffic_breathe_duty(state, timestamp_ms);
     }
@@ -305,9 +309,11 @@ static const char *parse_command(const cJSON *root, light_state_t *next,
     if (is_traffic_light) {
         int blink_ms = 0;
         int period_ms = TRAFFIC_DEFAULT_BREATHE_PERIOD_MS;
+        int brightness = 100;
         uint8_t lights = 0;
         if (!json_int(root, "blink_ms", 0, 60000, false, &blink_ms) ||
             !json_int(root, "period_ms", 400, 20000, false, &period_ms) ||
+            !json_int(root, "brightness", 0, 100, false, &brightness) ||
             !parse_traffic_lights(root, &lights)) {
             return "invalid traffic light parameter";
         }
@@ -333,6 +339,7 @@ static const char *parse_command(const cJSON *root, light_state_t *next,
             }
         }
         next->traffic_lights = lights;
+        next->traffic_brightness = brightness;
         next->traffic_blink_ms = blink_ms;
         next->traffic_effect = effect;
         next->traffic_period_ms = period_ms;
@@ -503,6 +510,7 @@ esp_err_t led_controller_init(void)
         .brightness = CONFIG_DEFAULT_EXTERNAL_BRIGHTNESS,
         .step_ms = CONFIG_DEFAULT_CHASE_STEP_MS,
         .traffic_effect = TRAFFIC_EFFECT_STEADY,
+        .traffic_brightness = 100,
         .traffic_period_ms = TRAFFIC_DEFAULT_BREATHE_PERIOD_MS,
         .rgb_changed_at_ms = now_ms(),
         .traffic_changed_at_ms = now_ms(),
